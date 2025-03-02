@@ -11,7 +11,7 @@ This project is a web application that does an analysis of a web-page/URL.
     - [Frontend](#frontend-1)
     - [Deployment](#deployment)
 
-<img src="./video.webm" width="80%" height="80%"/>
+<img src="./video.gif" width="80%" height="80%"/>
 
 ## Running project with Docker
 

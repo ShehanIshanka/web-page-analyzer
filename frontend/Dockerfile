@@ -1,6 +1,11 @@
-FROM nginx:alpine
+FROM node:18
 
-COPY . /usr/share/nginx/html
+WORKDIR /app
+RUN npm install -g pnpm
 
-EXPOSE 80
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install
+COPY . .
 
+EXPOSE 8888
+CMD ["pnpm", "run", "serve"]

@@ -25,18 +25,45 @@ func main() {
 		var req struct {
 			URL string `json:"url"`
 		}
+
 		if err := c.BindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"error":   "Invalid request format",
+			})
 			return
 		}
 
-		data, err := analyzer.AnalyzeURL(req.URL)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		resultChan := make(chan struct {
+			data       *analyzer.AnalysisResult
+			statusCode int
+			err        error
+		})
+
+		go func() {
+			data, statusCode, err := analyzer.AnalyzeURL(req.URL)
+			resultChan <- struct {
+				data       *analyzer.AnalysisResult
+				statusCode int
+				err        error
+			}{data: data, statusCode: statusCode, err: err}
+		}()
+
+
+		result := <-resultChan
+
+		if result.err != nil {
+			c.JSON(result.statusCode, gin.H{
+				"success": false,
+				"error":   result.err.Error(),
+			})
 			return
 		}
 
-		c.JSON(http.StatusOK, data)
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"data":    result.data,
+		})
 	})
 
 	

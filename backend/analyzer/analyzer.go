@@ -7,17 +7,16 @@ import (
 	"sync"
 
 	"golang.org/x/net/html"
-
 )
 
 type AnalysisResult struct {
-	HTMLVersion    string `json:"html_version"`
-	Title          string `json:"title"`
-	Headings       map[string]int `json:"headings"`
-	InternalLinks  int `json:"internal_links"`
-	ExternalLinks  int `json:"external_links"`
-	InaccessibleLinks int `json:"inaccessible_links"`
-	LoginForm      bool `json:"login_form"`
+	HTMLVersion       string         `json:"html_version"`
+	Title             string         `json:"title"`
+	Headings          map[string]int `json:"headings"`
+	InternalLinks     int            `json:"internal_links"`
+	ExternalLinks     int            `json:"external_links"`
+	InaccessibleLinks int            `json:"inaccessible_links"`
+	LoginForm         bool           `json:"login_form"`
 }
 
 func AnalyzeURL(url string) (*AnalysisResult, int, error) {
@@ -51,42 +50,42 @@ func AnalyzeURL(url string) (*AnalysisResult, int, error) {
 	parseNode = func(n *html.Node) {
 		if n.Type == html.ElementNode {
 			switch n.Data {
-				case "title":
-					if n.FirstChild != nil {
-						result.Title = n.FirstChild.Data
-					}
-				case "h1", "h2", "h3", "h4", "h5", "h6":
-					result.Headings[n.Data]++
-				case "a":
-					for _, attr := range n.Attr {
-						if attr.Key == "href" {
-							allLinks = append(allLinks, attr.Val)
-							if strings.HasPrefix(attr.Val, "http") || strings.HasPrefix(attr.Val, "https") {
-								result.ExternalLinks++
-							} else {
-								result.InternalLinks++
-							}
-						}
-					}
-				case "button":
-                    buttonText := strings.ToLower(n.FirstChild.Data)
-                    if strings.Contains(buttonText, "log in") ||
-                       strings.Contains(buttonText, "sign in") ||
-                       strings.Contains(buttonText, "sign up") {
-                        result.LoginForm = true
-                    }
-				case "html":
-					if strings.Contains(n.FirstChild.Data, "html") {
-						if strings.Contains(n.FirstChild.Data, "PUBLIC \"-//W3C//DTD HTML 4.01//EN\"") {
-							result.HTMLVersion = "HTML4"
-						} else if strings.Contains(n.FirstChild.Data, "PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"") {
-							result.HTMLVersion = "XHTML1.0"
-						} else if strings.Contains(n.FirstChild.Data, "PUBLIC \"-//W3C//DTD HTML 3.2//EN\"") {
-							result.HTMLVersion = "HTML3.2"
+			case "title":
+				if n.FirstChild != nil {
+					result.Title = n.FirstChild.Data
+				}
+			case "h1", "h2", "h3", "h4", "h5", "h6":
+				result.Headings[n.Data]++
+			case "a":
+				for _, attr := range n.Attr {
+					if attr.Key == "href" {
+						allLinks = append(allLinks, attr.Val)
+						if strings.HasPrefix(attr.Val, "http") || strings.HasPrefix(attr.Val, "https") {
+							result.ExternalLinks++
 						} else {
-							result.HTMLVersion = "HTML5"
+							result.InternalLinks++
 						}
 					}
+				}
+			case "button":
+				buttonText := strings.ToLower(n.FirstChild.Data)
+				if strings.Contains(buttonText, "log in") ||
+					strings.Contains(buttonText, "sign in") ||
+					strings.Contains(buttonText, "sign up") {
+					result.LoginForm = true
+				}
+			case "html":
+				if strings.Contains(n.FirstChild.Data, "html") {
+					if strings.Contains(n.FirstChild.Data, "PUBLIC \"-//W3C//DTD HTML 4.01//EN\"") {
+						result.HTMLVersion = "HTML4"
+					} else if strings.Contains(n.FirstChild.Data, "PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"") {
+						result.HTMLVersion = "XHTML1.0"
+					} else if strings.Contains(n.FirstChild.Data, "PUBLIC \"-//W3C//DTD HTML 3.2//EN\"") {
+						result.HTMLVersion = "HTML3.2"
+					} else {
+						result.HTMLVersion = "HTML5"
+					}
+				}
 			}
 		}
 		for child := n.FirstChild; child != nil; child = child.NextSibling {

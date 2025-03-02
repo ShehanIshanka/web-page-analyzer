@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-    "github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 	"backend/analyzer"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -14,7 +14,7 @@ func main() {
 
 	// For CORS
 	r.Use(cors.New(cors.Config{
-		AllowAllOrigins: true,
+		AllowAllOrigins:  true,
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -49,7 +49,6 @@ func main() {
 			}{data: data, statusCode: statusCode, err: err}
 		}()
 
-
 		result := <-resultChan
 
 		if result.err != nil {
@@ -66,6 +65,5 @@ func main() {
 		})
 	})
 
-	
 	log.Fatal(r.Run(":8080"))
 }
